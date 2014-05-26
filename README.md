@@ -14,6 +14,8 @@ Usage
 
 ```
 #include "meArm_Adafruit.h"
+#include <Adafruit_PWMServoDriver.h>
+#include <Wire.h>
 
 meArm arm;
 
