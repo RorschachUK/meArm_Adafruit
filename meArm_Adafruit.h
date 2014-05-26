@@ -9,12 +9,11 @@
  *   arm.gotoPoint(70, 200, 10);
  *   arm.openGripper();
  */
-#ifndef MEARM_H
-#define MEARM_H
+#ifndef MEARM_ADAFRUIT_H
+#define MEARM_ADAFRUIT_H
 
+#include <Adafruit_PWMServoDriver.h>
 #include <Arduino.h>
-#include <Servo.h>
-
 const float pi=3.14159265359;
 
 struct ServoInfo {
@@ -31,7 +30,7 @@ class meArm {
       int sweepMinElbow=144, int sweepMaxElbow=36, float angleMinElbow=pi/4, float angleMaxElbow=-pi/4,
       int sweepMinGripper=75, int sweepMaxGripper=115, float angleMinGripper=pi/2, float angleMaxGripper=0);
     //required before running
-    void begin(int pinBase, int pinShoulder, int pinElbow, int pinGripper);
+    void begin(int pinBlock = 0, int address = 0x40);
     //Travel smoothly from current point to another point
     void gotoPoint(float x, float y, float z);
     //Set servos to reach a certain point directly without caring how we get there 
@@ -48,9 +47,9 @@ class meArm {
     float getZ();
   private:
     float _x, _y, _z;
-    Servo _base, _shoulder, _elbow, _gripper;
+    Adafruit_PWMServoDriver _pwm;
     ServoInfo _svoBase, _svoShoulder, _svoElbow, _svoGripper;
-    int _pinBase, _pinShoulder, _pinElbow, _pinGripper;
+    int _pinBlock;
 };
 
 #endif

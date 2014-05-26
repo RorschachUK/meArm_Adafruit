@@ -46,7 +46,7 @@ Installation
 
 Class methods of meArm object
 -----------------------------
-* void begin(int pinBlock = 0, int address = 0x40) - Optionally specify which block of four pins on the Adafruit board to use (base, shoulder, elbow and gripper), and which I2C address to use.  Begin must be called in setup() before any other calls to the meArm instance are made.
+* void begin(int pinBlock = 0, int address = 0x40) - Optionally specify which block of four pins on the Adafruit board to use (base, shoulder, elbow and gripper), and which I2C address to use.  Block -1 mirrors to all four blocks.  Begin must be called in setup() before any other calls to the meArm instance are made.
 * void openGripper() - opens the gripper, letting go of anything it was holding
 * void closeGripper() - closes the gripper, perhaps grabbing and holding something as it does so
 * void gotoPoint(float x, float y, float z) - move in a straight line from the current point to the requested position

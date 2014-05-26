@@ -1,4 +1,4 @@
-/* meArm IK joysticks - York Hackspace May 2014
+/* meArm_Adafruit IK joysticks - York Hackspace May 2014
  * Using inverse kinematics with joysticks
  * Uses two analogue joystcks (two pots each)
  * First stick moves gripper forwards, backwards, left and right
@@ -7,25 +7,31 @@
  * I used Sparkfun thumbstick breakout boards, oriented 'upside down'.
  * 
  * Pins:
- * Arduino    Stick1    Stick2    Base   Shoulder  Elbow    Gripper
- *    GND       GND       GND    Brown     Brown   Brown     Brown
- *     5V       VCC       VCC      Red       Red     Red       Red
+ * Arduino    Stick1    Stick2   PWMServo  
+ *    GND       GND       GND        GND
+ *     5V       VCC       VCC   VCC & V+
  *     A0       HOR
  *     A1       VER
  *     A2                 HOR
  *     A3                 VER
- *     11                       Yellow
- *     10                                 Yellow
- *      9                                         Yellow
- *      6                                                   Yellow
+ *     A4                            SDA
+ *     A5                            SCL
+ * 
+ * The servos attach to the first block of four servo connections on
+ * the Adafruit board, brown wire at the bottom, yellow wire at the top.
+ * Adafruit    Servo
+ *       0      Base
+ *       1  Shoulder (right)
+ *       2     Elbow (left)
+ *       3   Gripper
+ *
+ * You can attach to a different block of four by changing the 'begin' call
+ * to specify a block 0-3, e.g. to use the second block call arm.begin(1);
+ * - to mirror movements to all 4 blocks, call arm.begin(-1);
  */
-#include "meArm.h"
-#include <Servo.h>
-
-int basePin = 11;
-int shoulderPin = 10;
-int elbowPin = 9;
-int gripperPin = 6;
+#include "meArm_Adafruit.h"
+#include <Adafruit_PWMServoDriver.h>
+#include <Wire.h>
 
 int xdirPin = 0;
 int ydirPin = 1;
@@ -35,7 +41,7 @@ int gdirPin = 2;
 meArm arm;
 
 void setup() {
-  arm.begin(basePin, shoulderPin, elbowPin, gripperPin);
+  arm.begin();
 }
 
 void loop() {

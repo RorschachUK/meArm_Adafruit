@@ -10,9 +10,12 @@
  *   arm.openGripper();
  */
 #include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+#include <math.h>
 #include "ik.h"
-#include "meArm.h"
-#include <Servo.h>
+#include "meArm_Adafruit.h"
+
 bool setup_servo (ServoInfo& svo, const int n_min, const int n_max,
                   const float a_min, const float a_max)
 {
@@ -35,8 +38,8 @@ bool setup_servo (ServoInfo& svo, const int n_min, const int n_max,
 
 int angle2pwm (const ServoInfo& svo, const float angle)
 {
-    float pwm = 0.5f + svo.zero + svo.gain * angle;
-    return int(pwm);
+  int pwm = 150 + int(0.5f + 450.0 * (svo.zero + svo.gain * angle) / 180.0);
+  return pwm;
 }
 
 //Full constructor with calibration data
@@ -51,15 +54,11 @@ meArm::meArm(int sweepMinBase, int sweepMaxBase, float angleMinBase, float angle
   setup_servo(_svoGripper, sweepMinGripper, sweepMaxGripper, angleMinGripper, angleMaxGripper);
 }
 
-void meArm::begin(int pinBase, int pinShoulder, int pinElbow, int pinGripper) {
-  _pinBase = pinBase;
-  _pinShoulder = pinShoulder;
-  _pinElbow = pinElbow;
-  _pinGripper = pinGripper;
-  _base.attach(_pinBase);
-  _shoulder.attach(_pinShoulder);
-  _elbow.attach(_pinElbow);
-  _gripper.attach(_pinGripper);
+void meArm::begin(int pinBlock, int address) {
+  _pinBlock = pinBlock;
+  _pwm = Adafruit_PWMServoDriver(address);
+  _pwm.begin();
+  _pwm.setPWMFreq(60);
 
   goDirectlyTo(0, 100, 50);
   openGripper();
@@ -69,9 +68,17 @@ void meArm::begin(int pinBase, int pinShoulder, int pinElbow, int pinGripper) {
 void meArm::goDirectlyTo(float x, float y, float z) {
   float radBase,radShoulder,radElbow;
   if (solve(x, y, z, radBase, radShoulder, radElbow)) {
-    _base.write(angle2pwm(_svoBase,radBase));
-    _shoulder.write(angle2pwm(_svoShoulder,radShoulder));
-    _elbow.write(angle2pwm(_svoElbow,radElbow));
+    if (_pinBlock < 0) {
+      for (int i = 0; i < 4; i++) {
+        _pwm.setPWM(i * 4, 0, angle2pwm(_svoBase,radBase));
+        _pwm.setPWM(i * 4 + 1, 0, angle2pwm(_svoShoulder,radShoulder));
+        _pwm.setPWM(i * 4 + 2, 0, angle2pwm(_svoElbow,radElbow));
+      }
+    } else {
+      _pwm.setPWM(_pinBlock * 4, 0, angle2pwm(_svoBase,radBase));
+      _pwm.setPWM(_pinBlock * 4 + 1, 0, angle2pwm(_svoShoulder,radShoulder));
+      _pwm.setPWM(_pinBlock * 4 + 2, 0, angle2pwm(_svoElbow,radElbow));
+    }
     _x = x; _y = y; _z = z;
   }    
 }
@@ -100,13 +107,25 @@ bool meArm::isReachable(float x, float y, float z) {
 
 //Grab something
 void meArm::openGripper() {
-  _gripper.write(90);
+    if (_pinBlock < 0) {
+      for (int i = 0; i < 4; i++) {
+        _pwm.setPWM(i * 4 + 3, 0, angle2pwm(_svoGripper,PI/4.0));
+      }
+    } else {
+      _pwm.setPWM(_pinBlock * 4 + 3, 0, angle2pwm(_svoGripper,PI/4.0));
+    }
   delay(300);
 }
 
 //Let go of something
 void meArm::closeGripper() {
-  _gripper.write(120);
+    if (_pinBlock < 0) {
+      for (int i = 0; i < 4; i++) {
+        _pwm.setPWM(i * 4 + 3, 0, angle2pwm(_svoGripper,-PI/4.0));
+      }
+    } else {
+      _pwm.setPWM(_pinBlock * 4 + 3, 0, angle2pwm(_svoGripper,-PI/4.0));
+    }
   delay(300);
 }
 

@@ -5,37 +5,41 @@
  * Shoulder buttons or A & B buttons open and close the gripper.
  * The home button returns to starting point.
  * 
- * Uses meArm library by York Hack Space from https://github.com/yorkhackspace/meArm
+ * Uses meArm_Adafruit library from https://github.com/RorschachUK/meArm_Adafruit
  * Uses ClassicController library from https://github.com/wayneandlayne/Video-Game-Shield
  *
  * Connect the Wii Classic gamepad via a breakout such as
  * http://www.phenoptix.com/collections/breakout-board/products/wiichuck-a-wii-nunchuck-break-out-board-by-seeed-studio
  *
  * Pins:
- * Arduino    WiiChuck   Base   Shoulder  Elbow    Gripper
- *    GND         -     Brown     Brown   Brown     Brown
- *     5V         +       Red       Red     Red       Red
- *     A4         d
- *     A5         c
- *     11              Yellow
- *     10                        Yellow
- *      9                                Yellow
- *      6                                          Yellow
+ * Arduino    PWMServo  WiiChuck
+ *    GND         GND        -
+ *     5V    VCC & V+        +
+ *     A4         SDA        d
+ *     A5         SCL        c
+ * 
+ * The servos attach to the first block of four servo connections on
+ * the Adafruit board, brown wire at the bottom, yellow wire at the top.
+ * Adafruit    Servo
+ *       0      Base
+ *       1  Shoulder (right)
+ *       2     Elbow (left)
+ *       3   Gripper
+ *
+ * You can attach to a different block of four by changing the 'begin' call
+ * to specify a block 0-3, e.g. to use the second block call arm.begin(1);
+ * - to mirror movements to all 4 blocks, call arm.begin(-1);
  */
-#include "meArm.h"
-#include <Servo.h>
+#include "meArm_Adafruit.h"
+#include <Adafruit_PWMServoDriver.h>
+#include <Wire.h>
 #include <ClassicController.h>
-
-int basePin = 11;
-int shoulderPin = 10;
-int elbowPin = 9;
-int gripperPin = 6;
 
 meArm arm;
 ClassicController cc;
 
 void setup() {
-  arm.begin(basePin, shoulderPin, elbowPin, gripperPin);
+  arm.begin();
   cc.begin(WII_PLAYER_1);
   cc.joy_left_set_scaled_min_max(0, 99, 0, 99);
   cc.joy_right_set_scaled_min_max(0, 99, 0, 99);

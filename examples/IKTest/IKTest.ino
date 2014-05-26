@@ -1,28 +1,35 @@
-/* meArm IK test - York Hackspace May 2014
+/* meArm_Adafruit IK test - York Hackspace May 2014
  * Test applying Nick Moriarty's Inverse Kinematics solver
  * to Phenoptix' meArm robot arm, to walk a specified path.
  *
  * Pins:
- * Arduino    Base   Shoulder  Elbow    Gripper
- *    GND    Brown     Brown   Brown     Brown
- *     5V      Red       Red     Red       Red
- *     11    Yellow
- *     10             Yellow
- *      9                     Yellow
- *      6                               Yellow
+ * Arduino    PWMServo
+ *    GND         GND
+ *     5V    VCC & V+
+ *     A4         SDA
+ *     A5         SCL
+ * 
+ * The servos attach to the first block of four servo connections on
+ * the Adafruit board, brown wire at the bottom, yellow wire at the top.
+ * Adafruit    Servo
+ *       0      Base
+ *       1  Shoulder (right)
+ *       2     Elbow (left)
+ *       3   Gripper
+ *
+ * You can attach to a different block of four by changing the 'begin' call
+ * to specify a block 0-3, e.g. to use the second block call arm.begin(1);
+ * - to mirror movements to all 4 blocks, call arm.begin(-1);
  */
-#include "meArm.h"
-#include <Servo.h>
-
-int basePin = 11;
-int shoulderPin = 10;
-int elbowPin = 9;
-int gripperPin = 6;
+#include "meArm_Adafruit.h"
+#include <Adafruit_PWMServoDriver.h>
+#include <Wire.h>
 
 meArm arm;
 
 void setup() {
-  arm.begin(basePin, shoulderPin, elbowPin, gripperPin);
+  Serial.begin(9600);
+  arm.begin();
 }
 
 void loop() {
